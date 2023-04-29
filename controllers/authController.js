@@ -23,7 +23,25 @@ const registerController = async (req, res) => {
 };
 
 const loginController = async (req, res) => {
-  res.send('login')
+  const {email, password} = req.body;
+  if (!email || !password) {
+    throw new CustomError.BadRequestError('Please provide email and password')
+  };
+
+  const user = await User.findOne({email});
+  if (!user) {
+    throw new CustomError.UnauthenticatedError('Wrong credentials')
+  };
+
+  const isPasswordCorrect = await user.comparePassword(password);
+  if(!isPasswordCorrect){
+    throw new CustomError.UnauthenticatedError('Wrong credentials')  
+  };
+
+  const tokenUser = {name: user.name, userId: user._id, role: user.role};
+  attachCookiesToResponse({res, user: tokenUser});
+
+  res.status(StatusCodes.OK).json({user: tokenUser});
 };
 
 const logoutController = async (req, res) => {
