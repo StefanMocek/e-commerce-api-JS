@@ -5,7 +5,7 @@ const {
   showCurrentUser,
   updateUser,
   updateUserPassword
-} = require('../controllers/user.Controller');
+} = require('../controllers/userController');
 const {authenticateUser} = require('../middleware/authentication');
 
 const router = express.Router();
