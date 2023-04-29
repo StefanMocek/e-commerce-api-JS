@@ -9,7 +9,11 @@ const registerController = async (req, res) => {
     throw new CustomError.BadRequestError('Wrong credentials')
   };
 
-  const user = await User.create({name, email, password});
+  // for dev env and tests
+  const isFirstAccount = await user.count({}) === 0;
+  const role = isFirstAccount ? 'admin' : ' user';
+
+  const user = await User.create({name, email, password, role});
   res.status(StatusCodes.CREATED).json({user});
 };
 
