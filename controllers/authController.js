@@ -1,6 +1,16 @@
+const {StatusCodes} = require('http-status-codes');
+const User = require('../models/user.model');
+const CustomError = require('../errors');
 
 const registerController = async (req, res) => {
-  res.send('registerd')
+  const {email} = req.body;
+  const emailValidator = await User.findOne({email});
+  if(emailValidator) {
+    throw new CustomError.BadRequestError('Wrong credentials')
+  };
+
+  const user = await User.create(req.body);
+  res.status(StatusCodes.CREATED).json({user});
 };
 
 const loginController = async (req, res) => {
