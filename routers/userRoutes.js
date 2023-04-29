@@ -6,11 +6,14 @@ const {
   updateUser,
   updateUserPassword
 } = require('../controllers/userController');
-const {authenticateUser} = require('../middleware/authentication');
+const {
+  authenticateUser, 
+  authorizePermissions
+} = require('../middleware/authentication');
 
 const router = express.Router();
 
-router.route('/').get(authenticateUser, getAllUsers);
+router.route('/').get(authenticateUser, authorizePermissions, getAllUsers);
 
 router.route('/showMe').get(showCurrentUser);
 router.route('/updateUser').patch(updateUser);
