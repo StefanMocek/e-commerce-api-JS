@@ -13,7 +13,7 @@ const {
 
 const router = express.Router();
 
-router.route('/').get(authenticateUser, authorizePermissions, getAllUsers);
+router.route('/').get(authenticateUser, authorizePermissions('admin'), getAllUsers);
 
 router.route('/showMe').get(showCurrentUser);
 router.route('/updateUser').patch(updateUser);
