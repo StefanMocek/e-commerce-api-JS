@@ -16,12 +16,12 @@ const router = express.Router();
 
 router
   .route('/')
-  .post([authenticateUser, authorizePermissions('adimn')], createProduct)
+  .post([authenticateUser, authorizePermissions('admin')], createProduct)
   .get(getAllProducts);
 
 router
-  .route('/uploadImage')
-  .post([authenticateUser, authorizePermissions('adimn')], uploadImage);
+  .route('/uploadImage/:id')
+  .post([authenticateUser, authorizePermissions('admin')], uploadImage);
 
 router
   .route('/:id')

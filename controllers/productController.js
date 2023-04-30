@@ -47,12 +47,39 @@ const deleteProduct = async (req, res) => {
   };
 
   await product.remove();
-  
+
   res.status(StatusCodes.OK).json({msg: 'Success'});
 };
 
 const uploadImage = async (req, res) => {
-  res.send('uploadImage')
+  const {id: productId} = req.params;
+  const product = await Product.findOne({_id: productId});
+
+  if (!product) {
+    throw new CustomError.NotFoundError(`No product with id: ${req.params.id}`);
+  };
+
+  if (!req.files) {
+    throw new CustomError.BadRequestError('No File Uploaded');
+  }
+  const productImage = req.files.image;
+
+  if (!productImage.mimetype.startsWith('image')) {
+    throw new CustomError.BadRequestError('Please Upload Image');
+  }
+
+  const maxSize = 1024 * 1024;
+
+  if (productImage.size > maxSize) {
+    throw new CustomError.BadRequestError(
+      'Please upload image smaller than 1MB'
+    );
+  }
+
+  // to be completed 
+  // send image to AWS S3
+  // update image to S3 route
+
 };
 
 module.exports = {
