@@ -1,7 +1,7 @@
 const {StatusCodes} = require('http-status-codes');
 const User = require('../models/user.model');
 const CustomError = require('../errors');
-const {attachCookiesToResponse} = require('../utils')
+const {attachCookiesToResponse, createTokenUser} = require('../utils')
 
 const registerController = async (req, res) => {
   const {name, email, password} = req.body;
@@ -16,7 +16,7 @@ const registerController = async (req, res) => {
 
   const user = await User.create({name, email, password, role});
 
-  const tokenUser = {name: user.name, userId: user._id, role: user.role};
+  const tokenUser = createTokenUser(user);
   attachCookiesToResponse({res, user: tokenUser})
 
   res.status(StatusCodes.CREATED).json({user: tokenUser});
@@ -38,7 +38,7 @@ const loginController = async (req, res) => {
     throw new CustomError.UnauthenticatedError('Wrong credentials')  
   };
 
-  const tokenUser = {name: user.name, userId: user._id, role: user.role};
+  const tokenUser = createTokenUser(user);
   attachCookiesToResponse({res, user: tokenUser});
 
   res.status(StatusCodes.OK).json({user: tokenUser});
