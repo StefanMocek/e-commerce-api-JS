@@ -1,7 +1,7 @@
 const {StatusCodes} = require('http-status-codes');
 const User = require('../models/user.model');
 const CustomError = require('../errors');
-const {attachCookiesToResponse, createTokenUser} = require('../utils')
+const {attachCookiesToResponse, createTokenUser, checkPermissions} = require('../utils')
 
 const getAllUsers = async (req, res) => {
   const users = await User
@@ -19,6 +19,7 @@ const getSingleUser = async (req, res) => {
     throw new CustomError.NotFoundError(`No user with id: ${req.params.id}`);
   };
 
+  checkPermissions(req.user, user._id)
   res.status(StatusCodes.OK).json({user});
 };
 
