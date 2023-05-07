@@ -38,6 +38,10 @@ const loginController = async (req, res) => {
     throw new CustomError.UnauthenticatedError('Wrong credentials')
   };
 
+  if(!user.isVerified) {
+    throw new CustomError.UnauthenticatedError('Please verify your email')   
+  };
+
   const tokenUser = createTokenUser(user);
   attachCookiesToResponse({ res, user: tokenUser });
 
