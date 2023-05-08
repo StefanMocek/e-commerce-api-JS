@@ -23,6 +23,11 @@ const registerController = async (req, res) => {
   res.status(StatusCodes.CREATED).json({ msg: 'success - chceck your email', verificationToken })
 };
 
+const verifyEmailController = async (req, res) => {
+  const {verificationToken, email} = req.body;
+  res.send('verifyEmail')
+}
+
 const loginController = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -59,6 +64,7 @@ const logoutController = async (req, res) => {
 
 module.exports = {
   registerController,
+  verifyEmailController,
   loginController,
   logoutController
 }
