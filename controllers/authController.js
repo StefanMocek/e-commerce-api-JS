@@ -1,3 +1,4 @@
+const crypto = require('crypto')
 const { StatusCodes } = require('http-status-codes');
 const User = require('../models/user.model');
 const CustomError = require('../errors');
@@ -14,7 +15,7 @@ const registerController = async (req, res) => {
   const isFirstAccount = await user.count({}) === 0;
   const role = isFirstAccount ? 'admin' : ' user';
 
-  const verificationToken = 'temp fake token';
+  const verificationToken = crypto.randomBytes(40).toString('hex');
 
   const user = await User.create({ name, email, password, role, verificationToken });
 
