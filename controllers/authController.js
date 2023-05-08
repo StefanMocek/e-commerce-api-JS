@@ -24,8 +24,22 @@ const registerController = async (req, res) => {
 };
 
 const verifyEmailController = async (req, res) => {
-  const {verificationToken, email} = req.body;
-  res.send('verifyEmail')
+  const { verificationToken, email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new CustomError.UnauthenticatedError('Verification failed')
+  };
+  if (user.verificationToken !== verificationToken) {
+    throw new CustomError.UnauthenticatedError('Verification failed')
+  };
+
+  user.isVerified = true;
+  user.verified = Date.now();
+  user.verificationToken = '';
+
+  await user.save();
+
+  res.status(StatusCodes.OK).json({ msg: 'Email verified' });
 }
 
 const loginController = async (req, res) => {
@@ -44,8 +58,8 @@ const loginController = async (req, res) => {
     throw new CustomError.UnauthenticatedError('Wrong credentials')
   };
 
-  if(!user.isVerified) {
-    throw new CustomError.UnauthenticatedError('Please verify your email')   
+  if (!user.isVerified) {
+    throw new CustomError.UnauthenticatedError('Please verify your email')
   };
 
   const tokenUser = createTokenUser(user);
