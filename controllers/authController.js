@@ -2,7 +2,8 @@ const crypto = require('crypto')
 const { StatusCodes } = require('http-status-codes');
 const User = require('../models/user.model');
 const CustomError = require('../errors');
-const { attachCookiesToResponse, createTokenUser } = require('../utils')
+const { attachCookiesToResponse, createTokenUser } = require('../utils');
+const sendEmail = require('../utils/sendEmail');
 
 const registerController = async (req, res) => {
   const { name, email, password } = req.body;
@@ -19,8 +20,9 @@ const registerController = async (req, res) => {
 
   const user = await User.create({ name, email, password, role, verificationToken });
 
-  // temoporary sending the verificationToken - juest for test in postman
-  res.status(StatusCodes.CREATED).json({ msg: 'success - chceck your email', verificationToken })
+  await sendEmail();
+
+  res.status(StatusCodes.CREATED).json({ msg: 'success - chceck your email'})
 };
 
 const verifyEmailController = async (req, res) => {
