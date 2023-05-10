@@ -112,9 +112,19 @@ const logoutController = async (req, res) => {
   res.status(StatusCodes.OK).send({ message: 'user logout' })
 };
 
+const forgotPasswordController = async (req, res) => {
+  res.send('forgotPasswordController');
+};
+
+const resetPasswordController = async (req, res) => {
+  res.send('resetPasswordController');
+};
+
 module.exports = {
   registerController,
   verifyEmailController,
   loginController,
-  logoutController
+  logoutController,
+  forgotPasswordController,
+  resetPasswordController
 }
