@@ -23,13 +23,13 @@ const registerController = async (req, res) => {
   const user = await User.create({ name, email, password, role, verificationToken });
 
   await sendVerificationEmail({
-    name: user.name, 
-    email: user.email, 
-    verificationToken, 
+    name: user.name,
+    email: user.email,
+    verificationToken,
     origin
   });
 
-  res.status(StatusCodes.CREATED).json({ msg: 'success - chceck your email'})
+  res.status(StatusCodes.CREATED).json({ msg: 'success - chceck your email' })
 };
 
 const verifyEmailController = async (req, res) => {
@@ -74,10 +74,23 @@ const loginController = async (req, res) => {
   const tokenUser = createTokenUser(user);
 
   let refreshToken = '';
+
+  const existingToken = await Token.findOne({ user: user._id });
+  if (existingToken) {
+    const { isValid } = existingToken;
+    if (!isValid) {
+      throw new CustomError.UnauthenticatedError('Wrong credentials')
+    };
+    refreshToken = existingToken.existingToken;
+    attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+    res.status(StatusCodes.OK).json({ user: tokenUser });
+    return
+  }
+
   refreshToken = crypto.randomBytes(40).toString('hex');
   const userAgent = req.headers['user-agent'];
   const ip = req.ip;
-  const userToken = {refreshToken, userAgent, ip, user: user._id};
+  const userToken = { refreshToken, userAgent, ip, user: user._id };
 
   await Token.create(userToken);
   attachCookiesToResponse({ res, user: tokenUser, refreshToken });
