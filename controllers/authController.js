@@ -3,7 +3,15 @@ const { StatusCodes } = require('http-status-codes');
 const User = require('../models/user.model');
 const Token = require('../models/token.model');
 const CustomError = require('../errors');
-const { attachCookiesToResponse, createTokenUser, sendVerificationEmail } = require('../utils');
+const {
+  attachCookiesToResponse,
+  createTokenUser,
+  sendVerificationEmail,
+  sendResetPasswordEmail,
+  createHash
+} = require('../utils');
+
+const origin = 'http://localhost:3000';
 
 const registerController = async (req, res) => {
   const { name, email, password } = req.body;
@@ -16,7 +24,6 @@ const registerController = async (req, res) => {
   const isFirstAccount = await user.count({}) === 0;
   const role = isFirstAccount ? 'admin' : ' user';
 
-  const orgigin = 'http://localhost:3000';
 
   const verificationToken = crypto.randomBytes(40).toString('hex');
 
@@ -99,7 +106,7 @@ const loginController = async (req, res) => {
 };
 
 const logoutController = async (req, res) => {
-  await Token.findOneAndDelete({user: req.user.userId})
+  await Token.findOneAndDelete({ user: req.user.userId })
 
   res.cookie('accessToken', 'logout', {
     httpOnly: true,
@@ -112,9 +119,54 @@ const logoutController = async (req, res) => {
   res.status(StatusCodes.OK).send({ message: 'user logout' })
 };
 
+const forgotPasswordController = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    throw new CustomError.BadRequestError('Please provide email')
+  };
+
+  const user = await User.findOne({ email });
+  if (user) {
+    const passwordToken = crypto.randomBytes(70).toString('hex');
+
+    await sendResetPasswordEmail({ name: user.name, email: user.email, token: passwordToken, origin })
+
+    const tenMinutes = 1000 * 60 * 10;
+    passwordTokenExpirationDate = new Date(Date.now() + tenMinutes);
+    user.passwordToken = createHash(passwordToken);
+    user.passwordTokenExpirationDate = passwordTokenExpirationDate;
+    await user.save();
+  };
+  res.status(StatusCodes.OK).send({ message: 'user logout' })
+};
+
+const resetPasswordController = async (req, res) => {
+  const { token, email, password } = req.body;
+  if (!email || !token || !password) {
+    throw new CustomError.BadRequestError('Please provide all values')
+  };
+
+  const user = await User.findOne({ email });
+  if (user) {
+    const currentDate = new Date();
+    if (
+      user.passwordToken === createHash(token) &&
+      user.passwordTokenExpirationDate > currentDate
+    ) {
+      user.password = password;
+      user.passwordToken = null;
+      user.passwordTokenExpirationDate = null;
+      await user.save();
+    }
+  }
+  res.status(StatusCodes.OK).send({ message: 'password reset' })
+};
+
 module.exports = {
   registerController,
   verifyEmailController,
   loginController,
-  logoutController
+  logoutController,
+  forgotPasswordController,
+  resetPasswordController
 }
