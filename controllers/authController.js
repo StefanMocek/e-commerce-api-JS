@@ -99,7 +99,13 @@ const loginController = async (req, res) => {
 };
 
 const logoutController = async (req, res) => {
-  res.cookie('token', 'logout', {
+  await Token.findOneAndDelete({user: req.user.userId})
+
+  res.cookie('accessToken', 'logout', {
+    httpOnly: true,
+    expires: new Date(Date.now())
+  });
+  res.cookie('refreshToken', 'logout', {
     httpOnly: true,
     expires: new Date(Date.now())
   })

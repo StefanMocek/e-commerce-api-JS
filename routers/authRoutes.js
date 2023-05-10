@@ -4,13 +4,16 @@ const {
   loginController,
   logoutController,
   verifyEmailController
-} = require('../controllers/authController')
+} = require('../controllers/authController');
+const {
+  authenticateUser, 
+} = require('../middleware/authentication');
 
 const router = express.Router();
 
 router.post('./register', registerController);
 router.post('/login', loginController);
-router.get('/logout', logoutController);
+router.delete('/logout',authenticateUser, logoutController);
 router.post('/verify-email', verifyEmailController)
 
 module.exports = router
