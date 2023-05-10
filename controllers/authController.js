@@ -7,7 +7,8 @@ const {
   attachCookiesToResponse,
   createTokenUser,
   sendVerificationEmail,
-  sendResetPasswordEmail
+  sendResetPasswordEmail,
+  createHash
 } = require('../utils');
 
 const origin = 'http://localhost:3000';
@@ -132,7 +133,7 @@ const forgotPasswordController = async (req, res) => {
 
     const tenMinutes = 1000 * 60 * 10;
     passwordTokenExpirationDate = new Date(Date.now() + tenMinutes);
-    user.passwordToken = passwordToken;
+    user.passwordToken = createHash(passwordToken);
     user.passwordTokenExpirationDate = passwordTokenExpirationDate;
     await user.save();
   };
@@ -141,17 +142,20 @@ const forgotPasswordController = async (req, res) => {
 
 const resetPasswordController = async (req, res) => {
   const { token, email, password } = req.body;
-  if (!email || !token || !password)  {
+  if (!email || !token || !password) {
     throw new CustomError.BadRequestError('Please provide all values')
   };
 
   const user = await User.findOne({ email });
   if (user) {
     const currentDate = new Date();
-    if(user.passwordToken === token && user.passwordTokenExpirationDate > currentDate) {
+    if (
+      user.passwordToken === createHash(token) &&
+      user.passwordTokenExpirationDate > currentDate
+    ) {
       user.password = password;
-      user.passwordToken= null;
-      user.passwordTokenExpirationDate= null;
+      user.passwordToken = null;
+      user.passwordTokenExpirationDate = null;
       await user.save();
     }
   }
