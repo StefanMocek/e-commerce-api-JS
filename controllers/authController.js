@@ -99,7 +99,7 @@ const loginController = async (req, res) => {
 };
 
 const logoutController = async (req, res) => {
-  await Token.findOneAndDelete({user: req.user.userId})
+  await Token.findOneAndDelete({ user: req.user.userId })
 
   res.cookie('accessToken', 'logout', {
     httpOnly: true,
@@ -113,7 +113,22 @@ const logoutController = async (req, res) => {
 };
 
 const forgotPasswordController = async (req, res) => {
-  res.send('forgotPasswordController');
+  const { email } = req.body;
+  if (!email) {
+    throw new CustomError.BadRequestError('Please provide email')
+  };
+
+  const user = await User.findOne({ email });
+  if (user) {
+    const passwordToken = crypto.randomBytes(70).toString('hex');
+
+    const tenMinutes = 1000 * 60 * 10;
+    passwordTokenExpirationDate = new Date(Date.now() + tenMinutes);
+    user.passwordToken = passwordToken;
+    user.passwordTokenExpirationDate = passwordTokenExpirationDate;
+    await user.save();
+  };
+  res.status(StatusCodes.OK).send({ message: 'user logout' })
 };
 
 const resetPasswordController = async (req, res) => {
