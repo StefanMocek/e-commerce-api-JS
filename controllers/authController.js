@@ -3,9 +3,9 @@ const { StatusCodes } = require('http-status-codes');
 const User = require('../models/user.model');
 const Token = require('../models/token.model');
 const CustomError = require('../errors');
-const { 
-  attachCookiesToResponse, 
-  createTokenUser, 
+const {
+  attachCookiesToResponse,
+  createTokenUser,
   sendVerificationEmail,
   sendResetPasswordEmail
 } = require('../utils');
@@ -128,7 +128,7 @@ const forgotPasswordController = async (req, res) => {
   if (user) {
     const passwordToken = crypto.randomBytes(70).toString('hex');
 
-    await sendResetPasswordEmail({name: user.name, email: user.email, token: passwordToken, origin})
+    await sendResetPasswordEmail({ name: user.name, email: user.email, token: passwordToken, origin })
 
     const tenMinutes = 1000 * 60 * 10;
     passwordTokenExpirationDate = new Date(Date.now() + tenMinutes);
@@ -140,7 +140,22 @@ const forgotPasswordController = async (req, res) => {
 };
 
 const resetPasswordController = async (req, res) => {
-  res.send('resetPasswordController');
+  const { token, email, password } = req.body;
+  if (!email || !token || !password)  {
+    throw new CustomError.BadRequestError('Please provide all values')
+  };
+
+  const user = await User.findOne({ email });
+  if (user) {
+    const currentDate = new Date();
+    if(user.passwordToken === token && user.passwordTokenExpirationDate > currentDate) {
+      user.password = password;
+      user.passwordToken= null;
+      user.passwordTokenExpirationDate= null;
+      await user.save();
+    }
+  }
+  res.status(StatusCodes.OK).send({ message: 'password reset' })
 };
 
 module.exports = {
