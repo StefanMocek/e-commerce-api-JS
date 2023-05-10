@@ -5,7 +5,7 @@ const createJwt = ({ payload }) => {
   return token;
 };
 
-const isTokenValid = ({ token }) => {
+const isTokenValid = (token) => {
   return jwt.verify(token, process.env.JWT_SECRET)
 };
 
