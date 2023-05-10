@@ -3,7 +3,14 @@ const { StatusCodes } = require('http-status-codes');
 const User = require('../models/user.model');
 const Token = require('../models/token.model');
 const CustomError = require('../errors');
-const { attachCookiesToResponse, createTokenUser, sendVerificationEmail } = require('../utils');
+const { 
+  attachCookiesToResponse, 
+  createTokenUser, 
+  sendVerificationEmail,
+  sendResetPasswordEmail
+} = require('../utils');
+
+const origin = 'http://localhost:3000';
 
 const registerController = async (req, res) => {
   const { name, email, password } = req.body;
@@ -16,7 +23,6 @@ const registerController = async (req, res) => {
   const isFirstAccount = await user.count({}) === 0;
   const role = isFirstAccount ? 'admin' : ' user';
 
-  const orgigin = 'http://localhost:3000';
 
   const verificationToken = crypto.randomBytes(40).toString('hex');
 
@@ -121,6 +127,8 @@ const forgotPasswordController = async (req, res) => {
   const user = await User.findOne({ email });
   if (user) {
     const passwordToken = crypto.randomBytes(70).toString('hex');
+
+    await sendResetPasswordEmail({name: user.name, email: user.email, token: passwordToken, origin})
 
     const tenMinutes = 1000 * 60 * 10;
     passwordTokenExpirationDate = new Date(Date.now() + tenMinutes);
