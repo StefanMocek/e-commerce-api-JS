@@ -13,20 +13,21 @@ const attachCookiesToResponse = ({ res, user, refreshToken }) => {
   const accessTokenJWT = createJwt({ payload: { user } });
   const refreshTokenJWT = createJwt({ payload: { user, refreshToken } });
 
-  const tenDays = 1000 * 60 * 60 * 24 * 10;
+  const oneMonth = 1000 * 60 * 60 * 24 * 30;
+  const oneDay = 1000 * 60 * 60 * 24;
 
   res.cookie('accessToken', accessTokenJWT, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     signed: true,
-    maxAge: 1000 * 5
+    expires: new Date(Date.now() + oneDay),
   });
 
   res.cookie('refreshToken', refreshTokenJWT, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     signed: true,
-    expires: new Date(Date.now() + tenDays),
+    expires: new Date(Date.now() + oneMonth),
   });
 }
 
