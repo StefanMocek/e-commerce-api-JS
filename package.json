@@ -11,6 +11,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.331.0",
     "@aws-sdk/lib-storage": "^3.331.0",
+    "aws-sdk": "^2.1378.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
