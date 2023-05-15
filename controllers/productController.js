@@ -1,7 +1,8 @@
 const { StatusCodes } = require('http-status-codes');
 const Product = require('../models/product.model');
 const CustomError = require('../errors');
-const parsefile = require('../utils/fileparser');
+// const parsefile = require('../utils/fileparser');
+const AWS = require('aws-sdk');
 
 const createProduct = async (req, res) => {
   req.body.user = req.user.userId;
@@ -81,21 +82,39 @@ const uploadImage = async (req, res) => {
   // send image to AWS S3
   // update image to S3 route
 
-  await fileparser(req)
-    .then(data => {
-      console.log(data)
-      res.status(200).json({
-        message: "Success",
-        data
-      })
-    })
-    .catch(error => {
-      res.status(400).json({
-        message: "An error occurred.",
-        error
-      })
-    })
+  // await fileparser(req)
+  //   .then(data => {
+  //     console.log(data)
+  //     res.status(200).json({
+  //       message: "Success",
+  //       data
+  //     })
+  //   })
+  //   .catch(error => {
+  //     res.status(400).json({
+  //       message: "An error occurred.",
+  //       error
+  //     })
+  //   })
 
+  const s3 = new AWS.S3({
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+    region: 'eu-central-1',
+  });
+
+  const key = `${req.user.id}/${uuid()}.jpeg`
+
+  s3.getSignedUrl('putObject', {
+    Bucket: process.env.S3_REGION,
+    ContentType: 'image/jpeg',
+    Key: key
+  }, (err, url) => {
+    conole.log(url)
+    res.send({ key, url })
+  })
 };
 
 module.exports = {
