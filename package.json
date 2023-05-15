@@ -11,6 +11,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.331.0",
     "@aws-sdk/lib-storage": "^3.331.0",
+    "aws-sdk": "^2.1378.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
@@ -29,6 +30,7 @@
     "mongoose": "^6.0.8",
     "morgan": "^1.10.0",
     "nodemailer": "^6.9.1",
+    "uuid": "^9.0.0",
     "validator": "^13.6.0",
     "xss-clean": "^0.1.1"
   },
